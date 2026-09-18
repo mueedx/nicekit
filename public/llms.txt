@@ -1,0 +1,28 @@
+# Nicekit
+
+Nicekit is a lookup and tool kit. It shows a visitor their public IP, a download speed test, origin, weather at that location, a best-guess VPN flag, and the DNS resolver the browser used.
+
+It also ships file and web tools at /tools:
+
+- Browser-only file utilities (merge/split/rotate PDF, images to PDF, MP4 to MP3) — files never leave the machine. The four PDF tools share a tab at /tools/pdf.
+- Web fetchers: a Loom video/transcript downloader, a public claude.ai/share chat exporter (Markdown, TXT, DOCX, PDF), and a *.vercel.app subdomain availability checker.
+
+IPs, fingerprints, and lookup results are not stored.
+
+## Human interface
+
+Open / in a browser for the card UI.
+
+Open /tools for the tool index.
+
+For why the project exists and what tech it exercises, see /about.
+
+## Machine interfaces
+
+curl, wget, and httpie against / receive the public IP as text/plain.
+
+A request to / with Accept: application/json (and without preferring text/html) receives JSON with ip, origin, weather, and request. Speed, DNS, and VPN stay in the browser and are not in that JSON.
+
+## Sources
+
+Origin: ipwho.is and RIPE Stat. Weather: open-meteo.com. Speed: speed.cloudflare.com. DNS: ip-api edns. VPN flags: ipapi.is (heuristic).

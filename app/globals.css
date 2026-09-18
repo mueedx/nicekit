@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Country Flags";
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+1F1E6-1F1FF;
+  src: url("/fonts/TwemojiCountryFlags.woff2") format("woff2");
+}
+
+html.light {
+  color-scheme: light;
+  --background: #f1fdfd;
+  --foreground: #101d1e;
+  --muted: #5c6c6d;
+  --border: #d7e2e3;
+  --accent: #0d7e82;
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --surface: #e7f3f3;
+  --grid-line: color-mix(in srgb, var(--border) 55%, transparent);
+  --nav-bg: color-mix(in srgb, var(--background) 82%, transparent);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #0a1212;
+  --foreground: #e5f6f6;
+  --muted: #8a9a9b;
+  --border: #21292a;
+  --accent: #1cb4ba;
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+  --surface: #151d1e;
+  --grid-line: color-mix(in srgb, var(--border) 70%, transparent);
+  --nav-bg: color-mix(in srgb, var(--background) 78%, transparent);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-surface: var(--surface);
+  --font-sans: "Country Flags", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Country Flags", "JetBrains Mono", ui-monospace, "Cascadia Code",
+    "SF Mono", Menlo, Consolas, monospace;
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@utility label-mono-sm {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@utility link-muted {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  transition: color 200ms var(--ease-out);
+}
+
+@utility ui-transition {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animate-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}
+
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.animate-on-scroll {
+  animation: section-in 480ms var(--ease-out) both;
+  animation-play-state: paused;
+}
+
+.animate-on-scroll.is-visible {
+  animation-play-state: running;
+}
+
+.nav-blur {
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.mobile-atmosphere {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 6%, transparent) 0%,
+      transparent 42%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      var(--grid-line) 23px,
+      var(--grid-line) 24px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 23px,
+      var(--grid-line) 23px,
+      var(--grid-line) 24px
+    );
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+}
+
+@media (min-width: 1024px) {
+  .mobile-atmosphere {
+    display: none;
+  }
+}
