@@ -25,9 +25,6 @@
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "pdf-lib": [
-        "./types/pdf-lib.d.ts"
       ]
     }
   },
