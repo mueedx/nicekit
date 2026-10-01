@@ -5,7 +5,7 @@ Nicekit is a lookup and tool kit. It shows a visitor their public IP, a download
 It also ships file and web tools at /tools:
 
 - Browser-only file utilities (merge/split/rotate PDF, images to PDF, MP4 to MP3) — files never leave the machine. The four PDF tools share a tab at /tools/pdf.
-- Web fetchers: a Loom video/transcript downloader, a public claude.ai/share chat exporter (Markdown, TXT, DOCX, PDF), and a *.vercel.app subdomain availability checker.
+- Web fetchers: a Loom video/transcript downloader, public claude.ai/share and chatgpt.com/share chat exporters (Markdown, TXT, DOCX, PDF), and a *.vercel.app subdomain availability checker.
 
 IPs, fingerprints, and lookup results are not stored.
 

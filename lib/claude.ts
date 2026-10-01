@@ -2,6 +2,14 @@
 // Designed for Next.js App Router (Node runtime)
 // Ponytail principle: Use native fetch and stdlib string/regex parsing. No heavy dependencies.
 
+import {
+  docChatToMarkdown,
+  docChatToText,
+  docChatToSections,
+  type DocChat,
+  type DocChatSection,
+} from "./chat-export";
+
 export interface ClaudeMessage {
   role: 'human' | 'assistant';
   text: string;
@@ -246,68 +254,32 @@ export function safeChatFileName(name: string): string {
   return clean || 'claude-chat';
 }
 
-/**
- * Renders the chat as GitHub-flavored Markdown.
- */
-export function chatToMarkdown(chat: ClaudeChat): string {
-  const out: string[] = [];
-  out.push(`# ${chat.name}`);
-  out.push('');
-  out.push(`> Exported from [claude.ai/share/${chat.uuid}](https://claude.ai/share/${chat.uuid}) — ${chat.messageCount} messages.`);
-  out.push('');
-
-  for (const msg of chat.messages) {
-    const heading = msg.role === 'human' ? '## 🧑 You' : '## 🤖 Claude';
-    out.push(heading);
-    out.push('');
-    out.push(msg.text);
-    out.push('');
-  }
-
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+/** Maps a parsed Claude chat onto the shared DocChat shape used by exporters. */
+export function claudeToDocChat(chat: ClaudeChat): DocChat {
+  return {
+    name: chat.name,
+    sourceUrl: `https://claude.ai/share/${chat.uuid}`,
+    messageCount: chat.messageCount,
+    markdownLabels: { human: '🧑 You', assistant: '🤖 Claude' },
+    plainLabels: { human: 'YOU', assistant: 'CLAUDE' },
+    messages: chat.messages.map((m) => ({ role: m.role, text: m.text })),
+  };
 }
 
-/**
- * Renders the chat as plain text.
- */
+/** Renders the chat as GitHub-flavored Markdown. */
+export function chatToMarkdown(chat: ClaudeChat): string {
+  return docChatToMarkdown(claudeToDocChat(chat));
+}
+
+/** Renders the chat as plain text. */
 export function chatToText(chat: ClaudeChat): string {
-  const bar = '='.repeat(60);
-  const out: string[] = [];
-  out.push(bar);
-  out.push(chat.name);
-  out.push(`Source: https://claude.ai/share/${chat.uuid}`);
-  out.push(`Messages: ${chat.messageCount}`);
-  out.push(bar);
-  out.push('');
-
-  for (const msg of chat.messages) {
-    const label = msg.role === 'human' ? 'YOU' : 'CLAUDE';
-    out.push(`--- ${label} ---`);
-    out.push('');
-    out.push(msg.text);
-    out.push('');
-  }
-
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+  return docChatToText(claudeToDocChat(chat));
 }
 
 /** Renders the chat as a list of sections for DOCX/PDF exporters. */
-export interface ChatSection {
-  heading: string | null;
-  text: string;
+export function chatToSections(chat: ClaudeChat): DocChatSection[] {
+  return docChatToSections(claudeToDocChat(chat));
 }
 
-export function chatToSections(chat: ClaudeChat): ChatSection[] {
-  const sections: ChatSection[] = [
-    { heading: null, text: `Source: https://claude.ai/share/${chat.uuid} · ${chat.messageCount} messages` },
-  ];
-
-  for (const msg of chat.messages) {
-    sections.push({
-      heading: msg.role === 'human' ? 'YOU' : 'CLAUDE',
-      text: msg.text,
-    });
-  }
-
-  return sections;
-}
+/** Kept for callers that referenced the old section type name. */
+export type ChatSection = DocChatSection;

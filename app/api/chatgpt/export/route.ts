@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  extractClaudeShareId,
-  fetchClaudeChat,
-  chatToMarkdown,
-  chatToText,
-  claudeToDocChat,
+  extractChatGptShareId,
+  fetchChatGptChat,
+  chatGptToMarkdown,
+  chatGptToText,
+  chatGptToDocChat,
   safeChatFileName,
-  ClaudeLinkError,
-} from '@/lib/claude';
+  ChatGptLinkError,
+} from '@/lib/chatgpt';
 import { chatToDocx, chatToPdf } from '@/lib/exporters';
 
 export const runtime = 'nodejs';
@@ -16,11 +16,11 @@ export async function GET(req: NextRequest) {
   try {
     const url = req.nextUrl.searchParams.get('url') || '';
     const format = (req.nextUrl.searchParams.get('format') || 'md').toLowerCase();
-    const id = extractClaudeShareId(url);
+    const id = extractChatGptShareId(url);
 
     if (!id) {
       return NextResponse.json(
-        { success: false, code: 'invalid_url', error: 'Expected a Claude share URL: https://claude.ai/share/[UUID]' },
+        { success: false, code: 'invalid_url', error: 'Expected a ChatGPT share URL: https://chatgpt.com/share/[UUID]' },
         { status: 400 }
       );
     }
@@ -32,11 +32,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const chat = await fetchClaudeChat(id);
+    const chat = await fetchChatGptChat(id);
     const base = safeChatFileName(chat.name);
 
     if (format === 'md') {
-      return new NextResponse(chatToMarkdown(chat), {
+      return new NextResponse(chatGptToMarkdown(chat), {
         headers: {
           'Content-Type': 'text/markdown; charset=utf-8',
           'Content-Disposition': `attachment; filename="${base}.md"`,
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (format === 'txt') {
-      return new NextResponse(chatToText(chat), {
+      return new NextResponse(chatGptToText(chat), {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'Content-Disposition': `attachment; filename="${base}.txt"`,
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const docChat = claudeToDocChat(chat);
+    const docChat = chatGptToDocChat(chat);
     const bytes = format === 'docx' ? chatToDocx(docChat) : chatToPdf(docChat);
     return new NextResponse(Buffer.from(bytes), {
       headers: {
@@ -65,13 +65,13 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('API /api/claude/export error:', error);
-    const code = error instanceof ClaudeLinkError ? error.code : 'error';
+    console.error('API /api/chatgpt/export error:', error);
+    const code = error instanceof ChatGptLinkError ? error.code : 'error';
     return NextResponse.json(
       {
         success: false,
         code,
-        error: error.message || 'An unexpected error occurred while exporting the Claude chat.',
+        error: error.message || 'An unexpected error occurred while exporting the ChatGPT chat.',
       },
       { status: 502 }
     );

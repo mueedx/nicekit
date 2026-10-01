@@ -28,7 +28,7 @@ export type WebToolDefinition = {
   description: string;
   category: ToolCategory;
   kind: "web";
-  brand?: "vercel" | "loom" | "claude";
+  brand?: "vercel" | "loom" | "claude" | "chatgpt";
 };
 
 export type ToolRunContext = {

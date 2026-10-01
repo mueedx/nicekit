@@ -4,7 +4,7 @@ A whoami-class network diagnostic and a browser-only tools hub. Nothing identify
 
 **Live:** [nicekit.vercel.app](https://nicekit.vercel.app)
 
-Open `/` in a browser for the card: your public IP, a Cloudflare speed test, your origin, the weather there, a best-guess VPN flag, the DNS resolver your browser used, and your browser/OS. Open `/tools` for eight file and web tools. `curl` the same URL and you get just the IP. Files processed by the tools never leave your machine.
+Open `/` in a browser for the card: your public IP, a Cloudflare speed test, your origin, the weather there, a best-guess VPN flag, the DNS resolver your browser used, and your browser/OS. Open `/tools` for nine file and web tools. `curl` the same URL and you get just the IP. Files processed by the tools never leave your machine.
 
 ## The card (`/`)
 
@@ -27,7 +27,7 @@ Every row is a live measurement or lookup against your actual exit path, not a c
 
 ## Tools (`/tools`)
 
-Eight tools in two families. File tools run entirely in the browser — bytes never leave the tab. Web tools fetch public URLs through small server routes.
+Nine tools in two families. File tools run entirely in the browser — bytes never leave the tab. Web tools fetch public URLs through small server routes.
 
 ### File tools (client-side, 200 MB per file)
 
@@ -47,6 +47,7 @@ The four PDF tools share one tab at [`/tools/pdf`](https://nicekit.vercel.app/to
 | --- | --- |
 | Loom Downloader | From any `loom.com/share/` link: HD MP4 video, transcript as TXT, SRT, VTT, or JSON, and preview assets. |
 | Claude Chat Export | Read a public `claude.ai/share` conversation and export it as Markdown, TXT, DOCX, or PDF. |
+| ChatGPT Chat Export | Read a public `chatgpt.com/share` conversation and export it as Markdown, TXT, DOCX, or PDF. |
 | Vercel Domain Checker | Check whether a `*.vercel.app` subdomain is available for your next deployment. |
 
 ## Machine interfaces
@@ -61,7 +62,7 @@ The card is not only a web page. `proxy.ts` (Next 16's middleware) routes by cli
 | Reverse DNS | `curl -sS https://nicekit.vercel.app/hostname` → PTR name, or empty. |
 | An agent | Read [`/llms.txt`](https://nicekit.vercel.app/llms.txt) for the machine index. |
 
-One API route takes writes: `POST /api/tools/stats` — the anonymous conversion beacon. It returns 400 on bad JSON, 403 on a cross-origin `Origin`, and 429 past 30 requests per minute per IP. The web tools use their own routes under `/api/loom/*`, `/api/claude*`, and `/api/vercel-domain`.
+One API route takes writes: `POST /api/tools/stats` — the anonymous conversion beacon. It returns 400 on bad JSON, 403 on a cross-origin `Origin`, and 429 past 30 requests per minute per IP. The web tools use their own routes under `/api/loom/*`, `/api/claude*`, `/api/chatgpt*`, and `/api/vercel-domain`.
 
 ## Why it runs in the browser
 

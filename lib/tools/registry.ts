@@ -83,6 +83,15 @@ export const WEB_TOOLS: WebToolDefinition[] = [
     brand: "claude",
   },
   {
+    slug: "chatgpt-export",
+    title: "ChatGPT Chat Export",
+    description:
+      "Read a public chatgpt.com/share conversation and export it as Markdown, TXT, DOCX or PDF.",
+    category: "fetch",
+    kind: "web",
+    brand: "chatgpt",
+  },
+  {
     slug: "vercel-domain",
     title: "Vercel Domain Checker",
     description:

@@ -1,5 +1,5 @@
-// lib/exporters.ts - Zero-dependency DOCX (OOXML zip) and PDF writers for Claude chats
-import { chatToSections, type ClaudeChat } from "./claude";
+// lib/exporters.ts - Zero-dependency DOCX (OOXML zip) and PDF writers for chat exports
+import { docChatToSections, type DocChat } from "./chat-export";
 
 /* =====================================================================
    Minimal ZIP (STORE method, no compression) for DOCX generation
@@ -96,13 +96,13 @@ function docxParagraph(text: string, opts: { bold?: boolean; size?: number; spac
 }
 
 /**
- * Generates a minimal but valid .docx (Word 2007+ OOXML) from a Claude chat.
+ * Generates a minimal but valid .docx (Word 2007+ OOXML) from a chat.
  */
-export function chatToDocx(chat: ClaudeChat): Uint8Array {
-  const sections = chatToSections(chat);
+export function chatToDocx(chat: DocChat): Uint8Array {
+  const sections = docChatToSections(chat);
   const body: string[] = [];
 
-  body.push(docxParagraph(chat.name || 'Claude Chat', { bold: true, size: 36, spacing: 0 }));
+  body.push(docxParagraph(chat.name || 'Chat', { bold: true, size: 36, spacing: 0 }));
 
   for (const section of sections) {
     if (section.heading) {
@@ -195,17 +195,17 @@ interface PdfLine {
 }
 
 /**
- * Generates a minimal valid multi-page PDF (Helvetica) from a Claude chat.
+ * Generates a minimal valid multi-page PDF (Helvetica) from a chat.
  */
-export function chatToPdf(chat: ClaudeChat): Uint8Array {
+export function chatToPdf(chat: DocChat): Uint8Array {
   const lines: PdfLine[] = [];
 
-  lines.push({ text: chat.name || 'Claude Chat', bold: true, size: 18, gapBefore: 0 });
-  lines.push({ text: `Source: https://claude.ai/share/${chat.uuid}`, bold: false, size: 8, gapBefore: 8 });
+  lines.push({ text: chat.name || 'Chat', bold: true, size: 18, gapBefore: 0 });
+  lines.push({ text: `Source: ${chat.sourceUrl}`, bold: false, size: 8, gapBefore: 8 });
   lines.push({ text: `${chat.messageCount} messages`, bold: false, size: 8, gapBefore: 0 });
   lines.push({ text: '', bold: false, size: 10, gapBefore: 4 });
 
-  for (const section of chatToSections(chat)) {
+  for (const section of docChatToSections(chat)) {
     if (section.heading) {
       lines.push({ text: section.heading, bold: true, size: 13, gapBefore: 16 });
     }
