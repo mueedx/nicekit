@@ -4,9 +4,9 @@ A whoami-class network diagnostic and a browser-only tools hub. Nothing identify
 
 **Live:** [nicekit.vercel.app](https://nicekit.vercel.app)
 
-Open `/` in a browser for the card: your public IP, a Cloudflare speed test, your origin, the weather there, a best-guess VPN flag, the DNS resolver your browser used, and your browser/OS. Open `/tools` for nine file and web tools. `curl` the same URL and you get just the IP. Files processed by the tools never leave your machine.
+Open `/` in a browser for the tool hub — it lists the who-am-I tile plus every file and web tool. Open `/whoami` for the card: your public IP, a Cloudflare speed test, your origin, the weather there, a best-guess VPN flag, the DNS resolver your browser used, and your browser/OS. `curl` the same URL and you get just the IP. Files processed by the tools never leave your machine.
 
-## The card (`/`)
+## The card (`/whoami`)
 
 Every row is a live measurement or lookup against your actual exit path, not a cached sample.
 
@@ -25,9 +25,9 @@ Every row is a live measurement or lookup against your actual exit path, not a c
 | Visits | Anonymous total visit count and the set of country codes seen, via Upstash Redis. No IPs, no fingerprints. |
 | Backdrop | Three.js earth horizon on desktop, light/dark theme toggle everywhere. |
 
-## Tools (`/tools`)
+## Tools (`/`)
 
-Nine tools in two families. File tools run entirely in the browser — bytes never leave the tab. Web tools fetch public URLs through small server routes.
+Eight tools in two families, all listed as tiles on the home page. File tools run entirely in the browser — bytes never leave the tab. Web tools fetch public URLs through small server routes.
 
 ### File tools (client-side, 200 MB per file)
 
@@ -46,8 +46,7 @@ The four PDF tools share one tab at [`/tools/pdf`](https://nicekit.vercel.app/to
 | Tool | What it does |
 | --- | --- |
 | Loom Downloader | From any `loom.com/share/` link: HD MP4 video, transcript as TXT, SRT, VTT, or JSON, and preview assets. |
-| Claude Chat Export | Read a public `claude.ai/share` conversation and export it as Markdown, TXT, DOCX, or PDF. |
-| ChatGPT Chat Export | Read a public `chatgpt.com/share` conversation and export it as Markdown, TXT, DOCX, or PDF. |
+| AI Chat Export | Paste a public share link from **Claude, ChatGPT, DeepSeek, Qwen or Grok** — the tool detects which chat it is and exports the conversation as Markdown, TXT, DOCX, or PDF. |
 | Vercel Domain Checker | Check whether a `*.vercel.app` subdomain is available for your next deployment. |
 
 ## Machine interfaces
@@ -56,13 +55,13 @@ The card is not only a web page. `proxy.ts` (Next 16's middleware) routes by cli
 
 | You are | Try this |
 | --- | --- |
-| A browser | Open `/` for the card; `/tools` for the hub; `/about` for the story. |
+| A browser | Open `/` for the tool hub; `/whoami` for the card; `/about` for the story. |
 | `curl` / `wget` / `httpie` | `curl -sS -A curl https://nicekit.vercel.app` → your IP as `text/plain`. |
 | A JSON client | `curl -sS -H 'Accept: application/json' https://nicekit.vercel.app` → JSON with `ip`, `origin`, `weather`, `request`. Speed, DNS, and VPN stay in the browser and are not in the JSON. |
 | Reverse DNS | `curl -sS https://nicekit.vercel.app/hostname` → PTR name, or empty. |
 | An agent | Read [`/llms.txt`](https://nicekit.vercel.app/llms.txt) for the machine index. |
 
-One API route takes writes: `POST /api/tools/stats` — the anonymous conversion beacon. It returns 400 on bad JSON, 403 on a cross-origin `Origin`, and 429 past 30 requests per minute per IP. The web tools use their own routes under `/api/loom/*`, `/api/claude*`, `/api/chatgpt*`, and `/api/vercel-domain`.
+One API route takes writes: `POST /api/tools/stats` — the anonymous conversion beacon. It returns 400 on bad JSON, 403 on a cross-origin `Origin`, and 429 past 30 requests per minute per IP. The web tools use their own routes under `/api/loom/*`, `/api/chat/[provider]` (and `/api/chat/[provider]/export`, which dispatches Claude, ChatGPT, DeepSeek, Qwen and Grok shares), and `/api/vercel-domain`.
 
 ## Why it runs in the browser
 
@@ -70,13 +69,13 @@ One API route takes writes: `POST /api/tools/stats` — the anonymous conversion
 - **Body-size cap.** Vercel Hobby caps request bodies at 4.5 MB. PDF and video conversions would hit that limit server-side, so they run client-side and files never transit a server.
 - **Privacy.** User files and derived facts stay in the tab.
 
-The server side is deliberately small: the home page is an async server component (`loadVisitor` → IP, origin, weather; `recordPageVisit` → counters), `proxy.ts` handles the CLI/JSON routing and Client Hints, plus `/json`, `/hostname`, and the tool fetcher routes. There is no BFF layer — it was sketched (`/api/me`) and deleted because it would duplicate `loadVisitor` without hiding the client-only probes.
+The server side is deliberately small: `/whoami` is an async server component (`loadVisitor` → IP, origin, weather; `recordPageVisit` → counters), `/` is the tool hub, `proxy.ts` handles the CLI/JSON routing and Client Hints, plus `/json`, `/hostname`, and the tool fetcher routes. There is no BFF layer — it was sketched (`/api/me`) and deleted because it would duplicate `loadVisitor` without hiding the client-only probes.
 
 ## Data and privacy
 
 Nothing identifying about a visitor is stored. The only persisted state lives in Upstash Redis:
 
-- `visits:total` — incremented on HTML loads of `/` only (curl and `/json` don't count).
+- `visits:total` — incremented on HTML loads of `/whoami` only (curl and `/json` don't count).
 - `visits:countries` — which two-letter country codes have shown up.
 - `cache:origin:{ip}` / `cache:weather:{lat,lon}` — 10-minute caches so repeat visits don't re-hit ipwho.is / Open-Meteo.
 - `tools:conversions` — anonymous per-category count of successful conversions.

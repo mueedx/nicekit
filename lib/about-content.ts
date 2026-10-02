@@ -52,10 +52,10 @@ export const ABOUT_SECTIONS: AboutSection[] = [
     title: "Next.js and Vercel",
     body: "Vercel Hobby caps request bodies at 4.5 MB. That single limit is why PDF and video conversions run in the browser with pdf-lib and ffmpeg.wasm instead of uploading to a serverless function. Everything else is Next 16 App Router, React 19, Tailwind v4, deployed on Vercel Hobby.",
     items: [
-      "Home is an async RSC: loadVisitor and recordPageVisit on /",
+      "Home is an async RSC: loadVisitor and recordPageVisit run on /whoami",
       "DNS, VPN, speedtest, fingerprint, and tools UI stay client-side",
       "Tool pages pre-rendered with generateStaticParams",
-      "/ is force-dynamic so the IP is always current",
+      "/whoami is force-dynamic so the IP is always current",
       "proxy.ts handles CLI plain-IP, JSON rewrite, and Client Hints (not middleware.ts)",
       "Inter and JetBrains Mono, 2px corners, light/dark toggle, Three.js earth on desktop",
     ],
@@ -65,9 +65,10 @@ export const ABOUT_SECTIONS: AboutSection[] = [
     title: "Architecture decisions",
     body: "I sketched GET /api/me as a BFF so the Network tab would look tidy. Then I realized origin and weather already load in the RSC pass, and DNS plus speedtest have to run in the browser anyway. Proxying those through Vercel would lie about your connection. I deleted the idea instead of duplicating lib/visitor.ts behind another route.",
     items: [
-      "Browser gets the card, curl gets plaintext IP, JSON clients get /json",
+      "Browser gets the tool hub plus the card, curl gets plaintext IP, JSON clients get /json",
       "/llms.txt for agents that want a summary without scraping HTML",
       "POST /api/tools/stats is the only API route, and it only accepts a category name",
+      "One /api/chat/[provider] route dispatches Claude, ChatGPT, DeepSeek, Qwen and Grok shares onto a shared exporter",
     ],
   },
   {
@@ -75,7 +76,7 @@ export const ABOUT_SECTIONS: AboutSection[] = [
     title: "Redis",
     body: "Upstash over REST, every module marked server-only. If Redis is down, visits show a dash and the site still works. I use it for counts and short caches, nothing that identifies a visitor.",
     items: [
-      "visits:total increments on HTML loads of / only",
+      "visits:total increments on HTML loads of /whoami only",
       "visits:countries records which ISO codes have shown up",
       "cache:origin:{ip} saves repeat geo lookups for 10 minutes",
       "cache:weather:{lat,lon} does the same for Open-Meteo",

@@ -12,16 +12,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: SITE_URL,
+      url: `${SITE_URL}/`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 1,
     },
     {
-      url: `${SITE_URL}/tools`,
+      url: `${SITE_URL}/whoami`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
+      changeFrequency: "monthly",
+      priority: 1,
     },
     {
       url: `${SITE_URL}/tools/pdf`,

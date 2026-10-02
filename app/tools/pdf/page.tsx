@@ -38,7 +38,7 @@ export default function PdfToolsPage() {
             browser — files never leave your machine, max 200 MB per file.
           </p>
           <Link
-            href="/tools"
+            href="/"
             className="mt-4 inline-block label-mono text-muted ui-transition hover:text-accent"
           >
             ← All tools

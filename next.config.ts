@@ -18,6 +18,15 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   transpilePackages: ["@cloudflare/speedtest"],
+  async redirects() {
+    return [
+      // The homepage is now the hub that lists every tool.
+      { source: "/tools", destination: "/", permanent: true },
+      // Claude and ChatGPT merged into one auto-detecting tool.
+      { source: "/tools/claude-export", destination: "/tools/chat-export", permanent: true },
+      { source: "/tools/chatgpt-export", destination: "/tools/chat-export", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

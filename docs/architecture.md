@@ -20,12 +20,13 @@ For visual rules see [theme-ui-handover.md](./theme-ui-handover.md).
 
 ## Request flow (no BFF)
 
-Exitcard does **not** use a Backend-for-Frontend API layer. The home page is a **server component** that loads everything in one server render.
+Exitcard does **not** use a Backend-for-Frontend API layer. The diagnostic card is a **server component** that loads everything in one server render; the home page is the tile grid that links to it.
 
 ```
-Browser GET /
+Browser GET /            → tool hub (tile grid: who-am-I + every tool)
+Browser GET /whoami
   → middleware.ts (CLI plain IP, JSON rewrite, client hints)
-  → app/page.tsx (RSC)
+  → app/whoami/page.tsx (RSC)
        loadVisitor(headers)     // IP, origin, weather, UA facts
        recordPageVisit(code)    // Upstash incr + country hash
   → WhoAmICard (client component)
@@ -46,7 +47,7 @@ If we add a BFF later, it would be for API shape or caching, not to hide client-
 | --- | --- |
 | curl / wget / httpie | `text/plain` public IP only |
 | `Accept: application/json` (no HTML preference) | Rewritten to `/json` |
-| Normal browser | HTML card + `Accept-CH` for UA client hints |
+| Normal browser | HTML tool hub (`Accept-CH` for UA client hints); `/whoami` renders the card. |
 
 `/json` and curl do **not** increment visits or country flags.
 
@@ -126,7 +127,7 @@ Client: `@upstash/redis` with `new Redis({ url, token })`. We do **not** use `@v
 | `visits:total` | string (INCR) | Anonymous page view counter |
 | `visits:countries` | hash | ISO codes that have visited, e.g. `PK` → `yes` |
 
-`recordPageVisit(countryCode)` runs only from `app/page.tsx` on HTML `/`:
+`recordPageVisit(countryCode)` runs only from `app/whoami/page.tsx` on HTML `/whoami`:
 
 1. `INCR visits:total`
 2. If valid 2-letter code: `HSET visits:countries {code} yes`
@@ -154,7 +155,7 @@ Copy on the card: no user trace and no identifying info is saved.
 
 Server and client must match on first paint.
 
-- **`serverNow`**: passed from `app/page.tsx` into Advanced clock-skew and Origin timezone tooltips (`zoneTimeAt()` in `lib/zone-time.ts`). Avoids `new Date()` drift between SSR and hydration.
+- **`serverNow`**: passed from `app/whoami/page.tsx` into Advanced clock-skew and Origin timezone tooltips (`zoneTimeAt()` in `lib/zone-time.ts`). Avoids `new Date()` drift between SSR and hydration.
 - **WhoAmICard** is a client component so speed context and interactive sections share one tree.
 
 ## Page sections
@@ -173,7 +174,8 @@ Server and client must match on first paint.
 | Path | Role |
 | --- | --- |
 | `middleware.ts` | CLI IP, JSON rewrite, Accept-CH |
-| `app/page.tsx` | RSC entry, visitor load, Redis record |
+| `app/page.tsx` | Tool hub: who-am-I tile plus every tool tile |
+| `app/whoami/page.tsx` | RSC entry, visitor load, Redis record |
 | `app/json/route.ts` | JSON API (no Redis) |
 | `app/hostname/route.ts` | Reverse DNS for header |
 | `lib/visitor.ts` | `loadVisitor` orchestration |
@@ -188,7 +190,7 @@ Server and client must match on first paint.
 ## Deployment
 
 - Vercel project root: this repository
-- `dynamic = "force-dynamic"` on `/` so every view gets a fresh IP lookup and visit record
+- `dynamic = "force-dynamic"` on `/whoami` so every view gets a fresh IP lookup and visit record
 - Do not commit `.env.local` or Redis tokens
 
 ## Related docs

@@ -2,18 +2,18 @@
 
 Nicekit is a lookup and tool kit. It shows a visitor their public IP, a download speed test, origin, weather at that location, a best-guess VPN flag, and the DNS resolver the browser used.
 
-It also ships file and web tools at /tools:
+It also ships file and web tools, all listed on the home page:
 
 - Browser-only file utilities (merge/split/rotate PDF, images to PDF, MP4 to MP3) — files never leave the machine. The four PDF tools share a tab at /tools/pdf.
-- Web fetchers: a Loom video/transcript downloader, public claude.ai/share and chatgpt.com/share chat exporters (Markdown, TXT, DOCX, PDF), and a *.vercel.app subdomain availability checker.
+- Web fetchers: a Loom video/transcript downloader, a *.vercel.app subdomain availability checker, and one AI chat exporter at /tools/chat-export that reads public share links from Claude, ChatGPT, DeepSeek, Qwen and Grok (Markdown, TXT, DOCX, PDF).
 
 IPs, fingerprints, and lookup results are not stored.
 
 ## Human interface
 
-Open / in a browser for the card UI.
+Open / in a browser for the tool index and the who-am-I tile.
 
-Open /tools for the tool index.
+Open /whoami for the full diagnostic card: public IP, speed, origin, weather, VPN guess and browser.
 
 For why the project exists and what tech it exercises, see /about.
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SITE_URL } from "@/lib/site";
 
 export function SiteFooter() {
@@ -24,13 +25,17 @@ export function SiteFooter() {
           </span>{" "}
           <span className="select-all">curl {host}</span>
           {" · "}
-          <a className="link-muted hover:text-accent" href="/tools">
-            tools
-          </a>
+          <Link className="link-muted hover:text-accent" href="/whoami">
+            who am i
+          </Link>
           {" · "}
-          <a className="link-muted hover:text-accent" href="/about">
+          <Link className="link-muted hover:text-accent" href="/tools/pdf">
+            pdf
+          </Link>
+          {" · "}
+          <Link className="link-muted hover:text-accent" href="/about">
             about
-          </a>
+          </Link>
         </p>
       </div>
     </footer>

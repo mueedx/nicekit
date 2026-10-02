@@ -1,9 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { BrandMark, type Brand } from "@/components/BrandMark";
 import { Panel } from "@/components/Panel";
+import {
+  CHAT_PROVIDERS,
+  detectChatProvider,
+  supportedChatsLabel,
+  type ChatProviderId,
+} from "@/lib/chat-providers";
 
 type ChatMeta = {
+  provider: ChatProviderId;
   uuid: string;
   shareUrl: string;
   name: string;
@@ -19,7 +27,12 @@ const FORMAT_DESC: Record<(typeof FORMATS)[number], string> = {
   pdf: "PDF document",
 };
 
-export function ClaudeExporter() {
+/** Provider ids are chosen to line up with the brand marks. */
+function brandForProvider(id: ChatProviderId): Brand {
+  return id as Brand;
+}
+
+export function ChatExporter() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<{ message: string; code?: string } | null>(null);
@@ -29,34 +42,52 @@ export function ClaudeExporter() {
   async function inspect(target?: string) {
     const input = (target ?? url).trim();
     if (!input) {
-      setError({ message: "Paste a claude.ai/share link first.", code: "invalid_url" });
+      setError({
+        message: `Paste a share link from ${supportedChatsLabel()} first.`,
+        code: "invalid_url",
+      });
       return;
     }
+
+    const provider = detectChatProvider(input);
+    if (!provider) {
+      setError({
+        message: `That link is not from a supported chat. Paste a share link from ${supportedChatsLabel()}.`,
+        code: "invalid_url",
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setMeta(null);
 
     try {
-      const res = await fetch("/api/claude", {
+      const res = await fetch(`/api/chat/${provider}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: input }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error || "Failed to read the Claude chat.");
+        throw new Error(json.error || "Failed to read the chat.");
       }
       setMeta(json.data);
       setTimeout(() => headingRef.current?.focus(), 50);
     } catch (err) {
       setError({
-        message: err instanceof Error ? err.message : "Failed to connect to Claude.",
+        message: err instanceof Error ? err.message : "Failed to read this chat.",
         code: "blocked",
       });
     } finally {
       setLoading(false);
     }
   }
+
+  const detected = detectChatProvider(url);
+  const detectedMeta = detected
+    ? CHAT_PROVIDERS.find((p) => p.id === detected) ?? null
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,12 +100,12 @@ export function ClaudeExporter() {
             void inspect();
           }}
         >
-          <label className="label-mono-sm text-muted" htmlFor="claude-url">
-            Claude share link
+          <label className="label-mono-sm text-muted" htmlFor="chat-share-url">
+            Share link
           </label>
           <div className="mt-2 flex items-stretch gap-2 max-sm:flex-col">
             <input
-              id="claude-url"
+              id="chat-share-url"
               type="text"
               value={url}
               onChange={(e) => {
@@ -82,7 +113,7 @@ export function ClaudeExporter() {
                 if (error) setError(null);
               }}
               disabled={loading}
-              placeholder="https://claude.ai/share/..."
+              placeholder="https://claude.ai/share/… or chatgpt.com/share/…"
               spellCheck={false}
               autoComplete="off"
               className="w-full flex-1 rounded-[2px] border border-border bg-background px-3.5 py-2.5 font-mono text-sm text-foreground outline-none ui-transition placeholder:font-sans placeholder:opacity-75 focus:border-accent"
@@ -95,6 +126,30 @@ export function ClaudeExporter() {
               {loading ? "Reading…" : "Read Chat"}
             </button>
           </div>
+
+          <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 label-mono text-muted">
+            <span>Supports:</span>
+            {CHAT_PROVIDERS.map((p) => {
+              const active = detected === p.id;
+              return (
+                <span
+                  key={p.id}
+                  className={`inline-flex items-center gap-1.5 rounded-[2px] border px-2 py-0.5 ui-transition ${
+                    active ? "border-accent text-accent" : "border-border text-muted"
+                  }`}
+                  title={`${p.label} — ${p.placeholder}`}
+                >
+                  <BrandMark brand={brandForProvider(p.id)} size={14} />
+                  {p.label}
+                </span>
+              );
+            })}
+          </p>
+          {detectedMeta && !loading && !meta ? (
+            <p className="mt-2 label-mono-sm text-accent">
+              Detected {detectedMeta.label} — ready to read.
+            </p>
+          ) : null}
         </form>
       </Panel>
 
@@ -125,7 +180,7 @@ export function ClaudeExporter() {
             <div className="h-32 w-full animate-pulse rounded-[2px] bg-border" />
           </div>
           <p className="border-t border-border px-5 py-3 label-mono text-muted">
-            Reading Claude chat…
+            Reading chat…
           </p>
         </Panel>
       )}
@@ -134,10 +189,16 @@ export function ClaudeExporter() {
         <>
           <Panel className="max-w-none">
             <div className="p-5">
+              <div className="flex items-center gap-2">
+                <BrandMark brand={brandForProvider(meta.provider)} size={20} />
+                <span className="label-mono rounded-[2px] border border-border px-2 py-0.5 text-muted">
+                  {CHAT_PROVIDERS.find((p) => p.id === meta.provider)?.label}
+                </span>
+              </div>
               <h2
                 ref={headingRef}
                 tabIndex={-1}
-                className="text-lg font-medium text-foreground outline-none"
+                className="mt-2 text-lg font-medium text-foreground outline-none"
               >
                 {meta.name}
               </h2>
@@ -174,12 +235,10 @@ export function ClaudeExporter() {
                       <p className="font-mono text-sm font-semibold uppercase text-foreground">
                         .{fmt}
                       </p>
-                      <p className="label-mono mt-1 text-muted">
-                        {FORMAT_DESC[fmt]}
-                      </p>
+                      <p className="label-mono mt-1 text-muted">{FORMAT_DESC[fmt]}</p>
                     </div>
                     <a
-                      href={`/api/claude/export?url=${encodeURIComponent(meta.shareUrl)}&format=${fmt}`}
+                      href={`/api/chat/${meta.provider}/export?url=${encodeURIComponent(meta.shareUrl)}&format=${fmt}`}
                       download
                       className="rounded-[2px] border border-accent bg-accent px-4 py-2 text-center font-mono text-xs tracking-widest text-background uppercase ui-transition hover:bg-transparent hover:text-accent"
                     >

@@ -74,19 +74,10 @@ export const WEB_TOOLS: WebToolDefinition[] = [
     brand: "loom",
   },
   {
-    slug: "claude-export",
-    title: "Claude Chat Export",
+    slug: "chat-export",
+    title: "AI Chat Export",
     description:
-      "Read a public claude.ai/share conversation and export it as Markdown, TXT, DOCX or PDF.",
-    category: "fetch",
-    kind: "web",
-    brand: "claude",
-  },
-  {
-    slug: "chatgpt-export",
-    title: "ChatGPT Chat Export",
-    description:
-      "Read a public chatgpt.com/share conversation and export it as Markdown, TXT, DOCX or PDF.",
+      "Read a public Claude, ChatGPT, DeepSeek, Qwen or Grok share link and export it as Markdown, TXT, DOCX or PDF.",
     category: "fetch",
     kind: "web",
     brand: "chatgpt",
